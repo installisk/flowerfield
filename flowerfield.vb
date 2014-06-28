@@ -2,7 +2,7 @@ Imports System.Windows.Forms
 Imports System.Collections.CollectionBase 'used in buttonarray
 Imports System.Resources 'image load
 Imports System.Timers
-
+'tram
 
 Public Class Test
     Inherits System.Windows.Forms.Form
