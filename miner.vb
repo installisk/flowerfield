@@ -3,15 +3,15 @@ Imports System.Collections.CollectionBase 'used in buttonarray
 Imports System.Resources 'image load
 Imports System.Timers
 
-
+Imports System.Configuration
 
 
 Public Class Test
 
     Inherits System.Windows.Forms.Form
     
-    dim Xsize as integer = 20
-    dim Ysize as integer = 20
+    Public Shared  Xsize as integer = 20
+    Public Shared  Ysize as integer = 20
     
     dim fsize as integer = (Xsize+1)*(Ysize+1) 'field size
     
@@ -43,7 +43,10 @@ Public Class Test
         MyBase.New()
         MyBase.Topmost = True
         MyBase.Text = "Это Заголовок формы: Игра в сапера на минном поле"
-        MyBase.Size = new System.Drawing.Size(520,520)
+		MyBase.AutoScroll = True
+		
+		'MyBase.Size = new System.Drawing.Size(520,520)
+        MyBase.Size = new System.Drawing.Size(20 + (Xsize+2)*16 +20, 130 + (Ysize+2)*16 + 20 + 20)
         
        ' MyControlArray = New ButtonArray(Me)
        ' MyControlArray.AddNewButton()
@@ -88,7 +91,7 @@ Public Class Test
         call settimer
         call gobuttons
         
-        MyBase.Show()                                
+        MyBase.ShowDialog()                                
             
         'b.PerformClick()  
         
@@ -373,14 +376,125 @@ Public Class Test
     
    
     
-    Public Shared Sub Main()
-        'Dim T as New Test
-        'T = New Test()
-        System.Windows.Forms.Application.Run(New Test())
-    End Sub
+
     
 End Class
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Class testSettings
+Inherits System.Windows.Forms.Form
+
+    private WithEvents  textbox1 as New textbox()
+    private WithEvents textbox2 as New textbox()
+    private d as New Button()
+    
+    Dim Label1 as New Label()
+    Dim Label2 as New Label()
+
+	
+	Dim toolTip1 As New ToolTip()
+
+    Public Sub New()
+    
+        MyBase.New()
+        MyBase.Topmost = True
+        MyBase.Text = "Это Заголовок формы: Настройки Игры"
+        MyBase.Size = new System.Drawing.Size(420,420)
+        
+       ' MyControlArray = New ButtonArray(Me)
+       ' MyControlArray.AddNewButton()
+       ' MyControlArray(0).BackColor = System.Drawing.Color.Red
+        
+        textbox1.Dock = DockStyle.Top
+        textbox1.Text = cstr(Test.Xsize)
+        'addhandler b.Click, addressof b_click    
+
+        textbox2.Dock = DockStyle.Top
+        textbox2.Text = cstr(Test.Xsize)
+        'addhandler c.Click, addressof c_click         
+
+        d.Dock = DockStyle.Top
+        d.Text = "Вернуть в зад"
+        addhandler d.Click, addressof d_click      
+                
+
+        Label1.BackColor = System.Drawing.Color.LightGray
+        Label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        'Label1.Width = 60
+        Label1.Text = "Это метка Label1: Таймер"
+        'Label1.location = new System.Drawing.Point(20, 77)
+        Label1.Dock = DockStyle.Top
+    
+    
+        Label2.BackColor = System.Drawing.Color.DarkGray
+        Label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        Label2.Text = "Это метка Label2: Статус игры"
+        Label2.Dock = DockStyle.Top    
+    
+    
+        MyBase.Controls.Add(Label2)
+        MyBase.Controls.Add(Label1)
+ 
+ 
+        MyBase.Controls.Add(d)
+        MyBase.Controls.Add(textbox2)
+        MyBase.Controls.Add(textbox1)
+
+
+        'addhandler textBox1.Validated, addressof TextBox1_Validating 
+		
+        MyBase.Show()                                
+            
+        'b.PerformClick()  
+     End sub      
+				
+		Private Sub TextBox1_Validating(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles TextBox1.Validating, TextBox2.Validating
+			e.Cancel = Not IsTextInteger(CType(sender, TextBox))
+		End Sub
+
+		Private Function IsTextInteger(target As TextBox) As Boolean
+			If target.TextLength = 0 Then Return True
+			If Integer.TryParse(target.Text, Nothing) Then
+				ToolTip1.SetToolTip(target, String.Empty)
+				Return True
+			Else
+				ToolTip1.Show("Text entered must be an integer.", target, 0, target.Height, 5000)
+				target.SelectAll()
+				Return False
+			End If
+		End Function			
+		
+		public sub d_click(ByVal sender as object, byval e as eventargs)
+		   console.writeline("d_click executed" & vbCrlf & "on object : " & sender.tostring() & vbCrlf & vbtab  & DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))       
+			'System.Windows.Forms.Application.Run(New Test())
+			Test.Xsize = cint(TextBox1.text)
+			Test.Ysize = cint(TextBox2.text)
+			dim T as new Test
+			'showdialog(T)		
+			
+		end sub    		
+		
+            
+
+
+
+end class
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+module Module1
+    Public  Sub Main()
+        'Dim T as New Test
+        'T = New Test()
+        'System.Windows.Forms.Application.Run(New Test())
+		System.Windows.Forms.Application.Run(New testSettings())
+    End Sub
+	
+end module	
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
+
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
