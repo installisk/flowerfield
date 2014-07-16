@@ -10,8 +10,10 @@ Public Class Test
 
     Inherits System.Windows.Forms.Form
     
-    Public Shared  Xsize as integer = 20
-    Public Shared  Ysize as integer = 20
+    Public Shared Xsize as integer = 15 ' 0 1 2 .... Xsize
+    Public Shared  Ysize as integer = 15 ' 0 1 2 .... Ysize
+    Public Shared  minetotals as integer = 16
+    
     
     dim fsize as integer = (Xsize+1)*(Ysize+1) 'field size
     
@@ -20,8 +22,12 @@ Public Class Test
     dim mousepressed as boolean = false
     dim myevent as MouseEventArgs
        
-    dim minetotals as integer = 20   
+    
        
+    dim smile as System.Drawing.Image    =  system.drawing.image.fromfile("smile.png")
+    dim cat as System.Drawing.Image    =  system.drawing.image.fromfile("cat.png")    
+    dim dog as System.Drawing.Image    =  system.drawing.image.fromfile("dog.png")    
+    
     private b as New Button()
     private c as New Button()
     private d as New Button()
@@ -90,6 +96,7 @@ Public Class Test
  
         call settimer
         call gobuttons
+        call setmines
         
         MyBase.ShowDialog()                                
             
@@ -228,9 +235,9 @@ Public Class Test
                     case 0
                         zis.Image = Nothing
                     case 1
-                        zis.Image = system.drawing.image.fromfile("smile.png")
+                        zis.Image = smile
                     case 2
-                        zis.Image = system.drawing.image.fromfile("cat.png")
+                        zis.Image = cat
                         
                 end select
                 
@@ -244,31 +251,10 @@ Public Class Test
                     console.writeline ("BANG BANG !")
                     zis.tag(3) = 1
                     zis.FlatStyle = FlatStyle.Popup
-                    zis.Image = system.drawing.image.fromfile("dog.png")
+                    zis.Image = dog
                 else
                     
-                    dim i,j,localmines as integer
-                    localmines = 0
-                    for i = math.max(0, zis.tag(0)-1) to math.min(Xsize, zis.tag(0)+1) 
-                        for j = math.max(0, zis.tag(1)-1) to math.min(Ysize, zis.tag(1)+1) 
-                            if mybuttarray(i,j).tag(2) = 1 then localmines += 1
-                        next j
-                    next i
-                
-                    zis.text = cstr(localmines)
-                    zis.FlatStyle = FlatStyle.Popup
-                    zis.tag(3) = 1
-                
-                    if localmines = 0 then 
-                        for i = math.max(0, zis.tag(0)-1) to math.min(Xsize, zis.tag(0)+1) 
-                            for j = math.max(0, zis.tag(1)-1) to math.min(Ysize, zis.tag(1)+1) 
-                                if mybuttarray(i,j).tag(3)=0 then
-                                    console.writeline("autoclick on i = {0}, j = {1}",i,j)
-                                    call butt_clicker(mybuttarray(i,j), New MouseEventArgs(Windows.Forms.MouseButtons.Left, 1, 0, 0, 0))                            
-                                end if
-                            next j
-                        next i
-                    end if
+                    call checklocalmines(zis)
                 
                 end if               
                 
@@ -278,6 +264,7 @@ Public Class Test
                 dim chks as integer = fsize
                 dim bangs as integer = 0
                 dim totmines as integer = 0
+                
                 for s = 0 to Xsize
                     for r = 0 to Ysize
                     
@@ -291,15 +278,17 @@ Public Class Test
                 console.writeline("left to free = {0}, banged = {1}", chks, bangs)
                 Label1.Text= String.Format("Left to disarm = {0}, life spent = {1}", chks, bangs)
                 
-                if chks=0 then 
-                    console.writeline("Victory! Life spent = {0}", bangs)
+                if chks=0 then 'end game routines
+                    console.writeline("Game over! Life spent = {0}", bangs)
                     elapsedtime = DateTime.Now.Subtract(_elapseStartTime)
                     console.writeline(String.Format("{0}hr : {1}min : {2}sec", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds))
                     
 
                     Label1.Text= String.Format("Игра окончена. Мин взорвалось = {0}. Мин разминировано = {1}",  bangs, totmines - bangs)
-                    Label2.Text= String.Format("Общее время : {0} ч : {1} м : {2} с : {3} мс", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds, elapsedtime.Milliseconds)
-                                        
+                    
+                    dim restext as string = String.Format("Общее время : {0} ч : {1} м : {2} с : {3} мс", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds, elapsedtime.Milliseconds)
+                    
+                    Label2.Text = restext
                     
                     timestopped = true
                     aTimer.Enabled = false
@@ -309,13 +298,17 @@ Public Class Test
                     
                             if mybuttarray(s,r).tag(2)=1 and mybuttarray(s,r).tag(3)=0 then
                                 mybuttarray(s,r).tag(4)=1
-                                mybuttarray(s,r).Image = system.drawing.image.fromfile("smile.png")
+                                mybuttarray(s,r).Image = smile
                             end if
                             
                             removehandler mybuttarray(s,r).MouseDown, addressof butt_clicker 
                         next r
                     next s
+                
+                    Msgbox(String.Format("Игра окончена! \n\nМин взорвалось = {0} ({1}). Мин разминировано = {2} ({3}). \n\n\n{4}\n\nПлощадь поля = {5}\n\nКоличество мин = {6}\n\nЗаминированность поля (мины/площадь) = {7}",  bangs, FormatPercent(bangs/totmines), totmines - bangs, FormatPercent((totmines - bangs)/totmines), restext, fsize, totmines, FormatPercent(totmines/fsize) ).Replace("\n", Environment.NewLine), , "Результаты игры")
                     
+                    exit sub
+                
                 end if
                 
             case MouseButtons.Middle
@@ -339,6 +332,37 @@ Public Class Test
 
     end sub
 
+    
+    sub checklocalmines(zis as System.Windows.Forms.Button)
+
+        dim i,j,localmines as integer
+        localmines = 0
+        for i = math.max(0, zis.tag(0)-1) to math.min(Xsize, zis.tag(0)+1) 
+            for j = math.max(0, zis.tag(1)-1) to math.min(Ysize, zis.tag(1)+1) 
+                if mybuttarray(i,j).tag(2) = 1 then localmines += 1
+            next j
+        next i
+
+        zis.text = cstr(localmines)
+        zis.FlatStyle = FlatStyle.Popup
+        zis.tag(3) = 1
+
+
+
+        if localmines = 0 then 
+            for i = math.max(0, zis.tag(0)-1) to math.min(Xsize, zis.tag(0)+1) 
+                for j = math.max(0, zis.tag(1)-1) to math.min(Ysize, zis.tag(1)+1) 
+                    if mybuttarray(i,j).tag(3)=0 then
+                        console.writeline("autoclick on i = {0}, j = {1}",i,j)
+                        call checklocalmines(mybuttarray(i,j))
+                        'call butt_clicker(mybuttarray(i,j), New MouseEventArgs(Windows.Forms.MouseButtons.Left, 1, 0, 0, 0))                            
+                        
+                    end if
+                next j
+            next i
+        end if
+        
+    end sub
     
     public sub b_click(ByVal sender as object, byval e as eventargs)
         console.writeline("b_click executed" & vbCrlf & "on object : " & sender.tostring() & vbCrlf & vbTab  & DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))
@@ -386,6 +410,8 @@ Inherits System.Windows.Forms.Form
 
     private WithEvents  textbox1 as New textbox()
     private WithEvents textbox2 as New textbox()
+    private WithEvents textbox3 as New textbox()
+    
     private d as New Button()
     
     Dim Label1 as New Label()
@@ -406,15 +432,18 @@ Inherits System.Windows.Forms.Form
        ' MyControlArray(0).BackColor = System.Drawing.Color.Red
         
         textbox1.Dock = DockStyle.Top
-        textbox1.Text = cstr(Test.Xsize)
+        textbox1.Text = cstr(Test.Xsize) + 1
         'addhandler b.Click, addressof b_click    
 
         textbox2.Dock = DockStyle.Top
-        textbox2.Text = cstr(Test.Xsize)
+        textbox2.Text = cstr(Test.Xsize) + 1
         'addhandler c.Click, addressof c_click         
 
+        textbox3.Dock = DockStyle.Top
+        textbox3.Text = cstr(Test.minetotals)        
+        
         d.Dock = DockStyle.Top
-        d.Text = "Вернуть в зад"
+        d.Text = "Начать игру с выбранными установками"
         addhandler d.Click, addressof d_click      
                 
 
@@ -437,6 +466,7 @@ Inherits System.Windows.Forms.Form
  
  
         MyBase.Controls.Add(d)
+        MyBase.Controls.Add(textbox3)
         MyBase.Controls.Add(textbox2)
         MyBase.Controls.Add(textbox1)
 
@@ -447,11 +477,31 @@ Inherits System.Windows.Forms.Form
             
         'b.PerformClick()  
      End sub      
+
+
+        Private Sub TextBox1_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox1.MouseHover
+            dim target as textbox = CType(sender, TextBox)            
+            ' Update the mouse event label to indicate the MouseHover event occurred.
+            ToolTip1.Show("Тут должна быть ширина поля", target, 30, 0, 4500)         
+        end sub
+        
+        Private Sub TextBox2_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox2.MouseHover
+            dim target as textbox = CType(sender, TextBox)            
+            ' Update the mouse event label to indicate the MouseHover event occurred.
+            ToolTip1.Show("Тут должна быть высота поля", target, 30, 0, 4500)         
+        end sub        
+        
+        Private Sub TextBox3_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox3.MouseHover
+            dim target as textbox = CType(sender, TextBox)            
+            ' Update the mouse event label to indicate the MouseHover event occurred.
+            ToolTip1.Show("Тут должно быть количество мин на поле", target, 30, 0, 4500)         
+        end sub        
+
 				
-		Private Sub TextBox1_Validating(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles TextBox1.Validating, TextBox2.Validating
+		Private Sub TextBox123_Validating(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles TextBox1.Validating, TextBox2.Validating , TextBox3.Validating
 			e.Cancel = Not IsTextInteger(CType(sender, TextBox))
 		End Sub
-
+        
 		Private Function IsTextInteger(target As TextBox) As Boolean
 			If target.TextLength = 0 Then Return True
 			If Integer.TryParse(target.Text, Nothing) Then
@@ -463,13 +513,22 @@ Inherits System.Windows.Forms.Form
 				Return False
 			End If
 		End Function			
-		
+
+  
+        
+        
 		public sub d_click(ByVal sender as object, byval e as eventargs)
 		   console.writeline("d_click executed" & vbCrlf & "on object : " & sender.tostring() & vbCrlf & vbtab  & DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))       
 			'System.Windows.Forms.Application.Run(New Test())
-			Test.Xsize = cint(TextBox1.text)
-			Test.Ysize = cint(TextBox2.text)
-			dim T as new Test
+            
+			Test.Xsize = cint(TextBox1.text) - 1
+			Test.Ysize = cint(TextBox2.text) - 1
+            Test.minetotals = cint(TextBox3.text)
+            if Test.minetotals/( Test.Xsize * Test.Ysize) > 0.99 then 
+                msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля."),,"Предупреждение!")
+            else
+                dim T as new Test
+            end if
 			'showdialog(T)		
 			
 		end sub    		
@@ -486,6 +545,7 @@ end class
 module Module1
     Public  Sub Main()
         'Dim T as New Test
+        
         'T = New Test()
         'System.Windows.Forms.Application.Run(New Test())
 		System.Windows.Forms.Application.Run(New testSettings())
