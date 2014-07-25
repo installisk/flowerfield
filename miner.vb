@@ -36,7 +36,7 @@ Public Class Test
     Dim Label2 as New Label()
     
     Private Shared aTimer As System.Timers.Timer
-    Private _elapseStartTime As DateTime
+    Private _elapseStartTime, _lastClick As DateTime
     Dim elapsedtime as System.TimeSpan
     
     'Dim MyControlArray as ButtonArray
@@ -52,7 +52,7 @@ Public Class Test
 		MyBase.AutoScroll = True
 		
 		'MyBase.Size = new System.Drawing.Size(520,520)
-        MyBase.Size = new System.Drawing.Size(20 + (Xsize+2)*16 +20, 130 + (Ysize+2)*16 + 20 + 20)
+        MyBase.Size = new System.Drawing.Size(20 + (Xsize+2)*16 +20, 60 + (Ysize+2)*16 + 20 + 20)
         
        ' MyControlArray = New ButtonArray(Me)
        ' MyControlArray.AddNewButton()
@@ -89,9 +89,9 @@ Public Class Test
         MyBase.Controls.Add(Label1)
  
  
-        MyBase.Controls.Add(d)
-        MyBase.Controls.Add(c)
-        MyBase.Controls.Add(b)
+        'MyBase.Controls.Add(d)
+        'MyBase.Controls.Add(c)
+        'MyBase.Controls.Add(b)
 
  
         call settimer
@@ -118,7 +118,7 @@ Public Class Test
         
         aTimer.SynchronizingObject = me
         
-        _elapseStartTime = DateTime.Now
+        
   
     end sub
 
@@ -136,7 +136,7 @@ Public Class Test
 
                 console.write (". Nothing, i=" & CStr(i) & ";j=" & CStr(j))
                 mybuttarray(i,j) = new button()
-                mybuttarray(i,j).location = new System.Drawing.Point(20 + i*16, 130 + j*16)
+                mybuttarray(i,j).location = new System.Drawing.Point(20 + i*16, 60 + j*16)
                 mybuttarray(i,j).Name = ""                
                 mybuttarray(i,j).Tag = New Integer() {i, j, 0, 0, 0} 'mine, clicked, flagged
                 mybuttarray(i,j).Size = new System.Drawing.Size(16,16)
@@ -208,13 +208,14 @@ Public Class Test
         if timestopped then 
             timestopped = false
             aTimer.Enabled = True
+            _elapseStartTime = DateTime.Now
         end if
 
         
         dim zis as button
         zis = CType(sender, System.Windows.Forms.Button)
           
-        
+        elapsedtime = DateTime.Now.Subtract(_elapseStartTime)
         
         console.writeline("clicked button i = {0}, j = {1}, mineflag = {2}",zis.Tag(0), zis.Tag(1),zis.Tag(2))
         
@@ -280,13 +281,13 @@ Public Class Test
                 
                 if chks=0 then 'end game routines
                     console.writeline("Game over! Life spent = {0}", bangs)
-                    elapsedtime = DateTime.Now.Subtract(_elapseStartTime)
+                    
                     console.writeline(String.Format("{0}hr : {1}min : {2}sec", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds))
                     
 
                     Label1.Text= String.Format("Игра окончена. Мин взорвалось = {0}. Мин разминировано = {1}",  bangs, totmines - bangs)
                     
-                    dim restext as string = String.Format("Общее время : {0} ч : {1} м : {2} с : {3} мс", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds, elapsedtime.Milliseconds)
+                    dim restext as string = String.Format("Время игры : {0} ч : {1} м : {2} с : {3} мс", elapsedtime.Hours, elapsedtime.Minutes, elapsedtime.Seconds, elapsedtime.Milliseconds)
                     
                     Label2.Text = restext
                     
@@ -461,8 +462,8 @@ Inherits System.Windows.Forms.Form
         Label2.Dock = DockStyle.Top    
     
     
-        MyBase.Controls.Add(Label2)
-        MyBase.Controls.Add(Label1)
+        'MyBase.Controls.Add(Label2)
+        'MyBase.Controls.Add(Label1)
  
  
         MyBase.Controls.Add(d)
@@ -524,8 +525,9 @@ Inherits System.Windows.Forms.Form
 			Test.Xsize = cint(TextBox1.text) - 1
 			Test.Ysize = cint(TextBox2.text) - 1
             Test.minetotals = cint(TextBox3.text)
-            if Test.minetotals/( Test.Xsize * Test.Ysize) > 0.99 then 
-                msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля."),,"Предупреждение!")
+            dim testmine as double = Test.minetotals/( (Test.Xsize+1) * (Test.Ysize+1))
+            if testmine > 0.99 then 
+                msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля. Сейчас они занимают {0} поля", FormatPercent(testmine)),,"Предупреждение!")
             else
                 dim T as new Test
             end if
