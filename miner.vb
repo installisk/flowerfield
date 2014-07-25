@@ -142,6 +142,7 @@ Public Class Test
                 mybuttarray(i,j).Size = new System.Drawing.Size(16,16)
                 mybuttarray(i,j).Capture = false
                 mybuttarray(i,j).FlatStyle = FlatStyle.Standard
+                mybuttarray(i,j).Font = New System.Drawing.Font(mybuttarray(i,j).Font.Name, 7, System.Drawing.FontStyle.Bold)
                 MyBase.Controls.Add(mybuttarray(i,j))
                 addhandler mybuttarray(i,j).MouseDown, addressof butt_clicker 
                 
@@ -344,7 +345,7 @@ Public Class Test
             next j
         next i
 
-        zis.text = cstr(localmines)
+        if not localmines = 0 then zis.text = cstr(localmines)
         zis.FlatStyle = FlatStyle.Popup
         zis.tag(3) = 1
 
@@ -526,8 +527,15 @@ Inherits System.Windows.Forms.Form
 			Test.Ysize = cint(TextBox2.text) - 1
             Test.minetotals = cint(TextBox3.text)
             dim testmine as double = Test.minetotals/( (Test.Xsize+1) * (Test.Ysize+1))
-            if testmine > 0.99 then 
+            if  cint(TextBox1.text) < 1
+                msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
+            elseif cint(TextBox2.text) < 1 
+                msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
+            elseif cint(TextBox3.text) < 0
+                msgbox(String.Format("Некорректное число мин, значение должно быть больше или равно 0"),,"Предупреждение!")               
+            elseif testmine > 0.99 then 
                 msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля. Сейчас они занимают {0} поля", FormatPercent(testmine)),,"Предупреждение!")
+               
             else
                 dim T as new Test
             end if
