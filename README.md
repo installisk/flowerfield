@@ -16,14 +16,14 @@ Simple minesweeper
 
 Requirements
 -----------------
-.net v.2 at least
+dot net v.4 
 
 
 Compile and run
 -----------------
 Compile
     
-    %windir%\Microsoft.NET\Framework\v2.0.50727\vbc.exe flowerfield.vb
+    %windir%\Microsoft.NET\Framework\v4.0.30319\vbc.exe flowerfield.vb
     
 Then run flowerfield.exe
 
