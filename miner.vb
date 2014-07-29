@@ -324,14 +324,8 @@ Public Class Test
                             call butt_clicker(mybuttarray(i,j), New MouseEventArgs(Windows.Forms.MouseButtons.Left, 1, 0, 0, 0))                            
                         end if
                     next j
-                next i
-                
-                
-                
+                next i       
         end select
-
-        
-
     end sub
 
     
@@ -399,12 +393,40 @@ Public Class Test
         
         'call dogmove
     End Sub 
-    
-   
-    
 
-    
 End Class
+
+
+'''''''''''''''''''''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''
+
+Class testHelp
+Inherits System.Windows.Forms.Form
+
+dim labelhelp as new Label()
+
+    Public Sub New()
+    
+        MyBase.New()
+        MyBase.Topmost = True
+        MyBase.Text = "Это Заголовок формы: Помощь"
+		MyBase.AutoScroll = True
+		
+        Labelhelp.BackColor = System.Drawing.Color.LightGray
+        Labelhelp.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+        'Label1.Width = 60
+        Labelhelp.Text = _ 
+<p>Здравствуйте, вас привествует терра робот с планеты Железяка. У нас все хорошо, дождей почти нет, масла хватит на 2^127 тактов. 
+Как у вас дела? </p>.Value
+        'Label1.location = new System.Drawing.Point(20, 77)
+        Labelhelp.Dock = DockStyle.fill
+
+        mybase.Controls.add(labelhelp)
+        MyBase.ShowDialog() 
+    end sub
+    
+end class
+
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Class testSettings
@@ -414,6 +436,7 @@ Inherits System.Windows.Forms.Form
     private WithEvents textbox2 as New textbox()
     private WithEvents textbox3 as New textbox()
     
+    private c as New Button()
     private d as New Button()
     
     Dim Label1 as New Label()
@@ -447,7 +470,11 @@ Inherits System.Windows.Forms.Form
         d.Dock = DockStyle.Top
         d.Text = "Начать игру с выбранными установками"
         addhandler d.Click, addressof d_click      
-                
+
+        c.Dock = DockStyle.Top
+        c.Text = "Окно помощи"
+        addhandler c.Click, addressof c_click  
+        
 
         Label1.BackColor = System.Drawing.Color.LightGray
         Label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -466,7 +493,7 @@ Inherits System.Windows.Forms.Form
         'MyBase.Controls.Add(Label2)
         'MyBase.Controls.Add(Label1)
  
- 
+        MyBase.Controls.Add(c)
         MyBase.Controls.Add(d)
         MyBase.Controls.Add(textbox3)
         MyBase.Controls.Add(textbox2)
@@ -481,78 +508,79 @@ Inherits System.Windows.Forms.Form
      End sub      
 
 
-        Private Sub TextBox1_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox1.MouseHover
-            dim target as textbox = CType(sender, TextBox)            
-            ' Update the mouse event label to indicate the MouseHover event occurred.
-            ToolTip1.Show("Тут должна быть ширина поля", target, 30, 0, 4500)         
-        end sub
+    Private Sub TextBox1_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox1.MouseHover
+        dim target as textbox = CType(sender, TextBox)            
+        ' Update the mouse event label to indicate the MouseHover event occurred.
+        ToolTip1.Show("Тут должна быть ширина поля", target, 30, 0, 4500)         
+    end sub
         
-        Private Sub TextBox2_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox2.MouseHover
-            dim target as textbox = CType(sender, TextBox)            
-            ' Update the mouse event label to indicate the MouseHover event occurred.
-            ToolTip1.Show("Тут должна быть высота поля", target, 30, 0, 4500)         
-        end sub        
+    Private Sub TextBox2_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox2.MouseHover
+        dim target as textbox = CType(sender, TextBox)            
+        ' Update the mouse event label to indicate the MouseHover event occurred.
+        ToolTip1.Show("Тут должна быть высота поля", target, 30, 0, 4500)         
+    end sub        
         
-        Private Sub TextBox3_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox3.MouseHover
-            dim target as textbox = CType(sender, TextBox)            
-            ' Update the mouse event label to indicate the MouseHover event occurred.
-            ToolTip1.Show("Тут должно быть количество мин на поле", target, 30, 0, 4500)         
-        end sub        
+    Private Sub TextBox3_MouseHover(sender As Object, e As System.EventArgs) Handles TextBox3.MouseHover
+        dim target as textbox = CType(sender, TextBox)            
+        ' Update the mouse event label to indicate the MouseHover event occurred.
+        ToolTip1.Show("Тут должно быть количество мин на поле", target, 30, 0, 4500)         
+    end sub        
 
 				
-		Private Sub TextBox123_Validating(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles TextBox1.Validating, TextBox2.Validating , TextBox3.Validating
-			e.Cancel = Not IsTextInteger(CType(sender, TextBox))
-		End Sub
+    Private Sub TextBox123_Validating(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles TextBox1.Validating, TextBox2.Validating , TextBox3.Validating
+        e.Cancel = Not IsTextInteger(CType(sender, TextBox))
+    End Sub
         
-		Private Function IsTextInteger(target As TextBox) As Boolean
-			If target.TextLength = 0 Then Return True
-			If Integer.TryParse(target.Text, Nothing) Then
-				ToolTip1.SetToolTip(target, String.Empty)
-				Return True
-			Else
-				ToolTip1.Show("Text entered must be an integer.", target, 0, target.Height, 5000)
-				target.SelectAll()
-				Return False
-			End If
-		End Function			
+    Private Function IsTextInteger(target As TextBox) As Boolean
+        If target.TextLength = 0 Then Return True
+        If Integer.TryParse(target.Text, Nothing) Then
+            ToolTip1.SetToolTip(target, String.Empty)
+            Return True
+        Else
+            ToolTip1.Show("Text entered must be an integer.", target, 0, target.Height, 5000)
+            target.SelectAll()
+            Return False
+        End If
+    End Function			
 
-  
+    public sub c_click(ByVal sender as object, byval e as eventargs) 
+    
+        dim H as new TestHelp
+    
+    end sub 'c_click
         
         
-		public sub d_click(ByVal sender as object, byval e as eventargs)
-		   console.writeline("d_click executed" & vbCrlf & "on object : " & sender.tostring() & vbCrlf & vbtab  & DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))       
-			'System.Windows.Forms.Application.Run(New Test())
-            
-			Test.Xsize = cint(TextBox1.text) - 1
-			Test.Ysize = cint(TextBox2.text) - 1
-            Test.minetotals = cint(TextBox3.text)
-            dim testmine as double = Test.minetotals/( (Test.Xsize+1) * (Test.Ysize+1))
-            if  cint(TextBox1.text) < 1
-                msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
-            elseif cint(TextBox2.text) < 1 
-                msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
-            elseif cint(TextBox3.text) < 0
-                msgbox(String.Format("Некорректное число мин, значение должно быть больше или равно 0"),,"Предупреждение!")               
-            elseif testmine > 0.99 then 
-                msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля. Сейчас они занимают {0} поля", FormatPercent(testmine)),,"Предупреждение!")
-               
-            else
-                dim T as new Test
-            end if
-			'showdialog(T)		
-			
-		end sub    		
+    public sub d_click(ByVal sender as object, byval e as eventargs)
+        console.writeline("d_click executed" & vbCrlf & "on object : " & sender.tostring() & vbCrlf & vbtab  & DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"))       
+        'System.Windows.Forms.Application.Run(New Test())
+        
+        Test.Xsize = cint(TextBox1.text) - 1
+        Test.Ysize = cint(TextBox2.text) - 1
+        Test.minetotals = cint(TextBox3.text)
+        dim testmine as double = Test.minetotals/( (Test.Xsize+1) * (Test.Ysize+1))
+        if  cint(TextBox1.text) < 1
+            msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
+        elseif cint(TextBox2.text) < 1 
+            msgbox(String.Format("Некорректная ширина поля, значение должно быть больше 0"),,"Предупреждение!")
+        elseif cint(TextBox3.text) < 0
+            msgbox(String.Format("Некорректное число мин, значение должно быть больше или равно 0"),,"Предупреждение!")               
+        elseif testmine > 0.99 then 
+            msgbox(String.Format("Слишком много мин! Мины не должны занимать больше 99% поля. Сейчас они занимают {0} поля", FormatPercent(testmine)),,"Предупреждение!")
+           
+        else
+            dim T as new Test
+        end if
+        'showdialog(T)		
+        
+    end sub   'd_click
 		
-            
-
-
-
 end class
 
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 module Module1
+
     Public  Sub Main()
         'Dim T as New Test
         
